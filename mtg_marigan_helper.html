@@ -187,11 +187,27 @@ function releaseSelect(withoutElement) {
 <body>
 
 <nav class="navbar navbar-dark bg-dark mb-3">
-		<a class="navbar-brand ms-3" href="#">マリガン基準ヘルパー</a>
+	<a class="navbar-brand ms-3" href="#">マリガン基準ヘルパー</a>
 </nav>
 
 <div class="container mb-3">
-	<button id="btnClearUunsorted"    type="button" class="btn btn-primary">未ソート色を全クリア</button>
+	<pre>
+	【説明】
+	マリガンするとき、その手札がどの程度の強さの手札なのかを判断するための基準を把握するためのツールです。
+
+	【使い方】
+	1. スクリーンショットツール(WinShotなど)で、初期手札の画像を何十枚か集める。（Sparkyとの対戦でマリガンしまくって画像を集めるとよい）
+	2. このツールに手札画像を読み込む。
+	3. ドラッグ＆ドロップして<b>『手動で』</b>手札画像を強さ順に整列させて、それぞれの手札がどの程度の強さなのかを見る。
+	
+	【手動で手札画像を強さ順に整列させる方法】
+	一覧の先頭に整列済みになったエリアを作って、まだ整列済みになっていない要素を１つずつ、整列済みになっているエリアの中の適切な位置にドラッグ＆ドロップで挿入していく。
+	説明資料：<a href="https://www.youtube.com/watch?v=z0YcQIqyV5Q" target="_blank">挿入ソート</a>。
+	</pre>
+</div>
+
+<div class="container mb-3">
+	<button id="btnClearUunsorted"    type="button" class="btn btn-primary">未整列色を全クリア</button>
 	<button id="btnRemoveAllItem"     type="button" class="btn btn-primary">画像を全て削除</button>
 	<button id="btnMakeRenameCommand" type="button" class="btn btn-primary">現在の並び順を出力</button>
 	　
@@ -215,6 +231,8 @@ function releaseSelect(withoutElement) {
 	</form>
 </dialog>
 
+
+<!--
 ■todo
 *N字で出せるようにする
 *挿入位置の色を目立つように
@@ -227,13 +245,11 @@ function releaseSelect(withoutElement) {
 *	イベントハンドラはaddEventListener方式にする
 *	idとクラス整理
 *画像サイズ調整を可能に。
-デザインを整理
-	このメモも消す。
+*デザインを整理
+*	このメモも消す。
 
 ■デザイン
-・ソート
-これは何？
-使い方。ソート説明も書く
+・マリガン基準の手札リスト
 
 [大小アイコンも]
 [未ソート色を全クリア]　[画像を全て削除]　[現在の並び順を出力]　※現在の並び順になるよう、ファイル名変更をするためのバッチコマンドを出力する。
@@ -255,6 +271,8 @@ N字
 0回マリガン後の手札点数MAX：100　1回マリガン後の手札点数MAX：[80]　2回マリガン後の手札点数MAX：[60]　[計算]
 														2回目キープ基準点
 １回目キープ基準点
+　↓
+Excelで確認すると、初回は50%より良ければキープ、次は30%より良ければキープするのが良さそうだった。
 
 ・先行後攻シミュレーター
 対戦で後攻を連続して引いてしまうことは不自然ではないことを納得するためのツール。
@@ -265,11 +283,7 @@ N字
 【参考URL】
 https://codelikes.com/javascript-ondrop-ondragover/<br>
 https://blog.ver001.com/javascript-dragdrop-sort/<br>
-【以下はキープ】
-クリーチャー2
-クマノ、クリーチャー
-クマノ、スクイーは除去があるならok
-
+-->
 
 </body>
 </html>
