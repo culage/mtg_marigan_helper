@@ -9,93 +9,105 @@ document.addEventListener("DOMContentLoaded", () => {
 	
 	let id = 0;
 	
-	// 画像アップロード処理
-	divUploadArea.addEventListener("drop", (e) => {
-		e.preventDefault();
-		const files = e.dataTransfer.files;
-		for (var i = 0; i < files.length; i++) {
-			const file = files[i];
+	// 画像ドロップ処理
+	divDropImageArea.addEventListener("drop", (event) => {
+		event.preventDefault();
+		
+		const fileloadPromiseList = [];
+		
+		// 要素追加
+		const files = event.dataTransfer.files;
+		for (const file of files) {
+			const p = new Promise(resolve => {
+				const reader = new FileReader();
+				reader.onload = (event) => {
+					const base64Text = event.currentTarget.result;
 
-			const reader = new FileReader()
-			reader.onload = (event) => {
-				const base64Text = event.currentTarget.result;
+					const isExistsImage = [...document.querySelectorAll('#drag-list img')].map(elm => elm.src).includes(base64Text);
+					if ( isExistsImage ) { return; }
 
-				const isExistsImage = [...document.querySelectorAll('.drag-list img')].map(elm => elm.src).includes(base64Text);
-				if ( isExistsImage ) { return; }
-
-				id++;
-				document.querySelector('#uploadImageArea').innerHTML += `<li id="item${id}" data-original-file="${file.name}" draggable="true" class="unsorted-item"><span>0%</span><img src="${base64Text}" /></li>`
-
-				// 順序入れ替え
-				refreshRate();
-
-				document.querySelectorAll('.drag-list li').forEach (elm => {
-					// 選択中アイテムに色を付ける
-					elm.onclick = function (event) {
-						event.stopPropagation();
-						event.currentTarget.classList.toggle("selected-item");
-						releaseSelect(event.currentTarget);
-					};
-					// ドラッグ＆ドロップ動作
-					elm.ondragstart = function (event) {
-						event.dataTransfer.setData('text/plain', event.currentTarget.id);
-						event.currentTarget.classList.add("selected-item");
-						releaseSelect(event.currentTarget);
-					};
-					elm.ondragover = function (event) {
-						event.preventDefault();
-						this.classList.add("drop-target-border");
-					};
-					elm.ondragleave = function () {
-						this.classList.remove("drop-target-border");
-					};
-					elm.ondrop = function (event) {
-						event.preventDefault();
-						let id = event.dataTransfer.getData('text/plain');
-						let elm_drag = document.getElementById(id);
-						elm_drag.classList.remove("unsorted-item");
-						this.parentNode.insertBefore(elm_drag, this);
-						this.classList.remove("drop-target-border");
-						refreshRate();
-					};
-				});
-
-			}
-			reader.readAsDataURL(file)
+					id++;
+					const html = `<li id="item${id}" data-original-file="${file.name}" draggable="true" class="unsorted-item"><span>0%</span><img src="${base64Text}" /></li>`;
+					document.querySelector('#drag-list').insertAdjacentHTML("beforeend", html);
+					resolve();
+				}
+				reader.readAsDataURL(file)
+			});
+			
+			fileloadPromiseList.push(p);
 		}
+		
+		// 全ての追加後
+		Promise.all(fileloadPromiseList).then(() => {
+			// 順序表示
+			refreshRate();
+
+			// 各アイテム動作
+			document.querySelectorAll('#drag-list li').forEach (elm => {
+				// 選択中アイテムに色を付ける
+				elm.onclick = function (event) {
+					event.stopPropagation();
+					event.currentTarget.classList.toggle("selected-item");
+					releaseSelect(event.currentTarget);
+				};
+				// ドラッグ＆ドロップ動作
+				elm.ondragstart = function (event) {
+					event.dataTransfer.setData('text/plain', event.currentTarget.id);
+					event.currentTarget.classList.add("selected-item");
+					releaseSelect(event.currentTarget);
+				};
+				elm.ondragover = function (event) {
+					event.preventDefault();
+					this.classList.add("drop-target-border");
+				};
+				elm.ondragleave = function () {
+					this.classList.remove("drop-target-border");
+				};
+				elm.ondrop = function (event) {
+					event.preventDefault();
+					let id = event.dataTransfer.getData('text/plain');
+					let elm_drag = document.getElementById(id);
+					elm_drag.classList.remove("unsorted-item");
+					this.parentNode.insertBefore(elm_drag, this);
+					this.classList.remove("drop-target-border");
+					refreshRate();
+				};
+			});
+		});
+
 	});
 
-	// アップロードにドロップでページ移動しないようにする
-	divUploadArea.addEventListener("dragover", (e) => {
-		e.preventDefault()
+	// 画像ドロップでページ移動しないようにする
+	divDropImageArea.addEventListener("dragover", (event) => {
+		event.preventDefault()
 	});
 
 	// カード画像以外クリックで選択解除
-	document.body.addEventListener("click", (e) => {
+	document.body.addEventListener("click", (event) => {
 		releaseSelect(null);
 	});
 
 	// 未ソート色を全クリアボタン
-	btnClearUunsorted.addEventListener("click", (e) => {
-		[...document.querySelectorAll('.drag-list li')].forEach(elm => {
+	btnClearUunsorted.addEventListener("click", (event) => {
+		[...document.querySelectorAll('#drag-list li')].forEach(elm => {
 			elm.classList.remove("unsorted-item");
 		});
 	});
 
 	// 画像を全て削除ボタン
-	btnRemoveAllItem.addEventListener("click", (e) => {
-		[...document.querySelectorAll('.drag-list li')].forEach(elm => {
+	btnRemoveAllItem.addEventListener("click", (event) => {
+		[...document.querySelectorAll('#drag-list li')].forEach(elm => {
 			elm.remove();
 		});
 	});
 
 	// 現在の並び順を出力ボタン
-	btnMakeRenameCommand.addEventListener("click", (e) => {
+	btnMakeRenameCommand.addEventListener("click", (event) => {
 		const getFileExt = f => f.split('.').pop();
 
 		let command = "";
 
-		const list = [...document.querySelectorAll('.drag-list li')];
+		const list = [...document.querySelectorAll('#drag-list li')];
 		command += list.map(elm => `ren "${elm.dataset.originalFile}" "${"TMP_" + String(list.indexOf(elm)).padStart(4, "0") + "." + getFileExt(elm.dataset.originalFile)}"`).join("\n");
 
 		command += "\n";
@@ -109,30 +121,30 @@ document.addEventListener("DOMContentLoaded", () => {
 
 // 割合表示の更新
 function refreshRate() {
-	var list = [...document.querySelectorAll('.drag-list li span')];
+	var list = [...document.querySelectorAll('#drag-list li span')];
 	list.forEach(elm => elm.innerText = String(Math.round((list.indexOf(elm) / list.length) * 100)).padStart(2, "0") + "%");
 }
 
 // 選択解除
 function releaseSelect(withoutElement) {
-	[...document.querySelectorAll('.drag-list li')].filter(elm => elm != withoutElement).forEach(elm => {
+	[...document.querySelectorAll('#drag-list li')].filter(elm => elm != withoutElement).forEach(elm => {
 		elm.classList.remove("selected-item");
 	});
 }
 
 </script>
 <style>
-.drag-list {
+#drag-list {
 	column-count		: 3;
 	padding-left		: 0px;
 	margin-left 		: 20px;
 	margin-right		: 20px;
 }
-.drag-list li {
+#drag-list li {
 	list-style-type 	: none;
 	margin-bottom 		: 5px;
 }
-.drag-list li img {
+#drag-list li img {
 	width 				: calc(100% - 3em);
 }
 .unsorted-item {
@@ -157,9 +169,9 @@ function releaseSelect(withoutElement) {
 	<button id="btnRemoveAllItem"     type="button" class="btn btn-primary">画像を全て削除</button>
 	<button id="btnMakeRenameCommand" type="button" class="btn btn-primary">現在の並び順を出力</button>
 </div>
-<ul id="uploadImageArea" class="drag-list"></ul>
+<ul id="drag-list"></ul>
 <div class="container">
-	<div id="divUploadArea" class="mb-3 d-flex justify-content-center border rounded">
+	<div id="divDropImageArea" class="mb-3 d-flex justify-content-center border rounded">
 		<div class="p-5">
 			ここに手札画像をドラッグ＆ドロップ
 		</div>
@@ -182,9 +194,9 @@ function releaseSelect(withoutElement) {
 *		クリックでトグル。ONならそれ以外をOFF。
 *		ドラッグ開始で開始要素をON、それ以外をOFF。
 *スクリプト出力
-スクリプトを整理
-	イベントハンドラはaddEventListener方式にする
-	idとクラス整理
+*スクリプトを整理
+*	イベントハンドラはaddEventListener方式にする
+*	idとクラス整理
 デザインを整理
 	このメモも消す。
 
