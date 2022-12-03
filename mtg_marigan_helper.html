@@ -23,7 +23,7 @@ function fileDrop(e) {
 			if ( isExistsImage ) { return; }
 
 			id++;
-			document.querySelector('#uploadImageArea').innerHTML += `<li id="item${id}" draggable="true" class="unsorted-item"><span>0%</span><img src="${base64Text}" /></li>`
+			document.querySelector('#uploadImageArea').innerHTML += `<li id="item${id}" data-original-file="${file.name}" draggable="true" class="unsorted-item"><span>0%</span><img src="${base64Text}" /></li>`
 
 			// 順序入れ替え
 			refreshRate();
@@ -68,12 +68,28 @@ function onBodyClick() {
 }
 function refreshRate() {
 	var list = [...document.querySelectorAll('.drag-list li span')];
-	list.forEach(elm => elm.innerText = String(Math.round((list.indexOf(elm) / list.length) * 100)).padStart(2, 0) + "%");
+	list.forEach(elm => elm.innerText = String(Math.round((list.indexOf(elm) / list.length) * 100)).padStart(2, "0") + "%");
 }
 function releaseSelect(withoutElement) {
 	[...document.querySelectorAll('.drag-list li')].filter(elm => elm != withoutElement).forEach(elm => {
 		elm.classList.remove("selected-item");
 	});
+}
+
+// 名称変更スクリプトを表示
+function makeRenameCommand() {
+	const getFileExt = f => f.split('.').pop();
+
+	let command = "";
+
+	const list = [...document.querySelectorAll('.drag-list li')];
+	command += list.map(elm => `ren "${elm.dataset.originalFile}" "${"TMP_" + String(list.indexOf(elm)).padStart(4, "0") + "." + getFileExt(elm.dataset.originalFile)}"`).join("\n");
+
+	command += "\n";
+	command += "ren TMP_*.* IMG_*.*\n";
+
+	document.querySelector("#txtOutputCommand").value = command;
+	document.querySelector('#favDialog').showModal();
 }
 </script>
 <style>
@@ -107,6 +123,9 @@ function releaseSelect(withoutElement) {
 		<a class="navbar-brand ms-3" href="#">マリガン基準ヘルパー</a>
 </nav>
 
+<div class="container mb-3">
+	<button type="button" class="btn btn-primary" onclick="makeRenameCommand()">現在の並び順を出力</button>
+</div>
 <ul id="uploadImageArea" class="drag-list"></ul>
 <div class="container">
 	<div ondrop="fileDrop(event)" ondragover="fileDragOver(event)" class="mb-3 d-flex justify-content-center border rounded">
@@ -116,6 +135,14 @@ function releaseSelect(withoutElement) {
 	</div>
 </div>
 
+<dialog id="favDialog" style="width:80%; height:80vh;">
+	<form method="dialog" style="height:100%; display:flex; flex-direction: column;">
+		<div>現在の並び順になるよう、ファイル名を連番ファイルに変更するバッチファイルコマンドです。</div>
+		<textarea id="txtOutputCommand" style="width:100%; margin-top:1em; margin-bottom:1em; flex:1;"></textarea>
+		<button class="btn btn-secondary">閉じる</button>
+	</form>
+</dialog>
+
 ■todo
 *N字で出せるようにする
 *挿入位置の色を目立つように
@@ -123,13 +150,14 @@ function releaseSelect(withoutElement) {
 *選択中アイテムに色をつける
 *		クリックでトグル。ONならそれ以外をOFF。
 *		ドラッグ開始で開始要素をON、それ以外をOFF。
-スクリプト出力
+*スクリプト出力
 
 ■デザイン
 ・ソート
 これは何？
 使い方。ソート説明も書く
 
+[大小アイコンも]
 [未ソート色を全クリア]　[画像を全て削除]　[現在の並び順を出力]　※現在の並び順になるよう、ファイル名変更をするためのバッチコマンドを出力する。
 
 N字
