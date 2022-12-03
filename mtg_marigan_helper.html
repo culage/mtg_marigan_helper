@@ -19,6 +19,9 @@
           reader.onload = (event) => {
             const base64Text = event.currentTarget.result
 
+            const isExistsImage = [...document.querySelectorAll('.drag-list img')].map(elm => elm.src).includes(base64Text);
+            if ( isExistsImage ) { return; }
+
             id++;
             document.querySelector('#uploadImageArea').innerHTML += `<li id="item${id}" draggable="true" style="background-color:cyan"><span>0%</span><img src="${base64Text}" /></li>`
             refreshRate();
@@ -87,7 +90,10 @@
 ■todo
 *N字で出せるようにする
 *挿入位置の色を目立つように
-同じ画像は読み込まない
+*同じ画像は読み込まない
+選択中色をつける
+	クリックでトグル。ONならそれ以外をOFF。
+	ドラッグ開始で開始要素をON、それ以外をOFF。
 スクリプト出力
 
 ■デザイン
