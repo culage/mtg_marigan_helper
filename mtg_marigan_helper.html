@@ -206,6 +206,7 @@ function releaseSelect(withoutElement) {
 	
 	【手動で手札画像を強さ順に整列させる方法】
 	一覧の先頭に整列済みになったエリアを作って、まだ整列済みになっていない要素を１つずつ、整列済みになっているエリアの中の適切な位置にドラッグ＆ドロップで挿入していく。
+	手札がどの程度の強さなのかを判断するための並び替えなので、整列は厳密でなくてもよい。
 	説明動画：<a href="https://www.youtube.com/watch?v=z0YcQIqyV5Q" target="_blank">挿入ソート</a>。
 	</pre>
 </div>
@@ -246,7 +247,7 @@ function releaseSelect(withoutElement) {
 	</pre>
 	<div>
 		<button id="btnSakiAto" type="button" class="btn btn-primary mb-2">先行後攻シミュレート</button>　
-		対戦回数：<input id="txtSakiAtoNum" type="text" value=20>
+		対戦回数：<input id="txtSakiAtoNum" type="text" value="50">
 	</div>
 	<div id="divSakiAto"></div>
 </div>
