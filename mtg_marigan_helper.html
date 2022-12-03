@@ -20,7 +20,7 @@
             const base64Text = event.currentTarget.result
 
             id++;
-            document.querySelector('#uploadImageArea').innerHTML += `<li id="item${id}" draggable="true" style="background-color:cyan"><span>0%</span><img src="${base64Text}" width="500px" /></li>`
+            document.querySelector('#uploadImageArea').innerHTML += `<li id="item${id}" draggable="true" style="background-color:cyan"><span>0%</span><img src="${base64Text}" /></li>`
             refreshRate();
 
             // 順序入れ替え
@@ -56,25 +56,26 @@
       }
     </script>
     <style>
-    .flex-box {
-		border: solid;
-        display         : flex;
-        flex-wrap       : wrap;
-        flex-direction  : row; /* column; */
-        /* height          : 200vh; */
-    }
-    .flex-box li {
+    .drag-list {
+	    column-count	: 3;
+	    padding-left	: 0px;
+	    margin-left		: 20px;
+	    margin-right	: 20px;
+	}
+    .drag-list li {
         list-style-type : none;
-        margin-right    : 20px;
         margin-bottom   : 5px;
     }
+    .drag-list li img {
+	    width			: calc(100% - 3em);
+	}
     </style>
   </head>
   <body>
     <nav class="navbar navbar-dark bg-dark mb-3">
       <a class="navbar-brand ms-3" href="#">マリガン基準ヘルパー</a>
     </nav>
-    <ul id="uploadImageArea" class="drag-list flex-box"></ul>
+    <ul id="uploadImageArea" class="drag-list"></ul>
     <div class="container">
       <div ondrop="fileDrop(event)" ondragover="fileDragOver(event)" class="mb-3 d-flex justify-content-center border rounded">
         <div class="p-5">
@@ -84,7 +85,7 @@
     </div>
 
 ■todo
-N字で出せるようにする
+*N字で出せるようにする
 挿入位置の色を目立つように
 同じ画像は読み込まない
 スクリプト出力
