@@ -132,6 +132,15 @@ document.addEventListener("DOMContentLoaded", () => {
 		document.querySelectorAll("#drag-list li img").forEach(elm => elm.style.width = `calc(${sizeBase}px - 2em)`);
 	});
 
+	// 先行後攻シミュレートボタン
+	btnSakiAto.addEventListener("click", (event) => {
+		let sakiAto = "";
+		for (let i=0; i<Number(txtSakiAtoNum.value); i++) {
+			sakiAto += (Math.random() < 0.5 ? `<span style="color:blue;">先</span>` : `<span style="color:red;">後</span>`);
+		}
+		divSakiAto.innerHTML = sakiAto;
+	});
+
 });
 
 // 割合表示の更新
@@ -193,7 +202,7 @@ function releaseSelect(withoutElement) {
 <div class="container mb-3">
 	<pre>
 	【説明】
-	マリガンするとき、その手札がどの程度の強さの手札なのかを判断するための基準を把握するためのツールです。
+	マリガンするとき、その手札がどの程度の強さの手札なのかを判断するための基準をつくる為の把握するためのツール。
 
 	【使い方】
 	1. スクリーンショットツール(WinShotなど)で、初期手札の画像を何十枚か集める。（Sparkyとの対戦でマリガンしまくって画像を集めるとよい）
@@ -202,7 +211,7 @@ function releaseSelect(withoutElement) {
 	
 	【手動で手札画像を強さ順に整列させる方法】
 	一覧の先頭に整列済みになったエリアを作って、まだ整列済みになっていない要素を１つずつ、整列済みになっているエリアの中の適切な位置にドラッグ＆ドロップで挿入していく。
-	説明資料：<a href="https://www.youtube.com/watch?v=z0YcQIqyV5Q" target="_blank">挿入ソート</a>。
+	説明動画：<a href="https://www.youtube.com/watch?v=z0YcQIqyV5Q" target="_blank">挿入ソート</a>。
 	</pre>
 </div>
 
@@ -225,11 +234,27 @@ function releaseSelect(withoutElement) {
 
 <dialog id="favDialog" style="width:80%; height:80vh;">
 	<form method="dialog" style="height:100%; display:flex; flex-direction: column;">
-		<div>現在の並び順になるよう、ファイル名を連番ファイルに変更するバッチファイルコマンドです。</div>
+		<div>現在の画面並び順になるよう、ファイル名を連番ファイルに変更するバッチファイルコマンド</div>
 		<textarea id="txtOutputCommand" style="width:100%; margin-top:1em; margin-bottom:1em; flex:1;"></textarea>
 		<button class="btn btn-secondary">閉じる</button>
 	</form>
 </dialog>
+
+
+<nav class="navbar navbar-dark bg-dark mt-5 mb-3">
+	<a class="navbar-brand ms-3" href="#">オマケ　先行後攻シミュレーター</a>
+</nav>
+<div class="container mb-5">
+	<pre>
+	対戦で後攻を連続して引いてしまうことに納得するためシミュレーター。
+	先行や後攻を5回程度連続で引くパターンは直感より遥かに多く出現する。
+	</pre>
+	<div>
+		<button id="btnSakiAto" type="button" class="btn btn-primary mb-2">先行後攻シミュレート</button>　
+		対戦回数：<input id="txtSakiAtoNum" type="text" value=20>
+	</div>
+	<div id="divSakiAto"></div>
+</div>
 
 
 <!--
