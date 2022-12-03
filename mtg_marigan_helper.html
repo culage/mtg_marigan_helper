@@ -76,7 +76,22 @@ function releaseSelect(withoutElement) {
 	});
 }
 
-// 名称変更スクリプトを表示
+
+// 未ソート色を全クリア
+function clearUunsorted() {
+	[...document.querySelectorAll('.drag-list li')].forEach(elm => {
+		elm.classList.remove("unsorted-item");
+	});
+}
+
+// 画像を全て削除
+function removeAllItem() {
+	[...document.querySelectorAll('.drag-list li')].forEach(elm => {
+		elm.remove();
+	});
+}
+
+// 現在の並び順を出力
 function makeRenameCommand() {
 	const getFileExt = f => f.split('.').pop();
 
@@ -124,6 +139,8 @@ function makeRenameCommand() {
 </nav>
 
 <div class="container mb-3">
+	<button type="button" class="btn btn-primary" onclick="clearUunsorted()">未ソート色を全クリア</button>
+	<button type="button" class="btn btn-primary" onclick="removeAllItem()">画像を全て削除</button>
 	<button type="button" class="btn btn-primary" onclick="makeRenameCommand()">現在の並び順を出力</button>
 </div>
 <ul id="uploadImageArea" class="drag-list"></ul>
