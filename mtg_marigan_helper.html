@@ -5,107 +5,121 @@
 <title>マリガン基準ヘルパー</title>
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
 <script>
-var id = 0;
-function fileDragOver(e) {
-	e.preventDefault()
-}
-function fileDrop(e) {
-	e.preventDefault()
-	const files = e.dataTransfer.files
-	for (var i = 0; i < files.length; i++) {
-		const file = files[i]
+document.addEventListener("DOMContentLoaded", () => {
+	
+	let id = 0;
+	
+	// 画像アップロード処理
+	divUploadArea.addEventListener("drop", (e) => {
+		e.preventDefault();
+		const files = e.dataTransfer.files;
+		for (var i = 0; i < files.length; i++) {
+			const file = files[i];
 
-		const reader = new FileReader()
-		reader.onload = (event) => {
-			const base64Text = event.currentTarget.result
+			const reader = new FileReader()
+			reader.onload = (event) => {
+				const base64Text = event.currentTarget.result;
 
-			const isExistsImage = [...document.querySelectorAll('.drag-list img')].map(elm => elm.src).includes(base64Text);
-			if ( isExistsImage ) { return; }
+				const isExistsImage = [...document.querySelectorAll('.drag-list img')].map(elm => elm.src).includes(base64Text);
+				if ( isExistsImage ) { return; }
 
-			id++;
-			document.querySelector('#uploadImageArea').innerHTML += `<li id="item${id}" data-original-file="${file.name}" draggable="true" class="unsorted-item"><span>0%</span><img src="${base64Text}" /></li>`
+				id++;
+				document.querySelector('#uploadImageArea').innerHTML += `<li id="item${id}" data-original-file="${file.name}" draggable="true" class="unsorted-item"><span>0%</span><img src="${base64Text}" /></li>`
 
-			// 順序入れ替え
-			refreshRate();
+				// 順序入れ替え
+				refreshRate();
 
-			document.querySelectorAll('.drag-list li').forEach (elm => {
-				// 選択中アイテムに色を付ける
-				elm.onclick = function (event) {
-					event.stopPropagation();
-					event.currentTarget.classList.toggle("selected-item");
-					releaseSelect(event.currentTarget);
-				};
-				// ドラッグ＆ドロップ動作
-				elm.ondragstart = function (event) {
-					event.dataTransfer.setData('text/plain', event.currentTarget.id);
-					event.currentTarget.classList.add("selected-item");
-					releaseSelect(event.currentTarget);
-				};
-				elm.ondragover = function (event) {
-					event.preventDefault();
-					this.classList.add("drop-target-border");
-				};
-				elm.ondragleave = function () {
-					this.classList.remove("drop-target-border");
-				};
-				elm.ondrop = function (event) {
-					event.preventDefault();
-					let id = event.dataTransfer.getData('text/plain');
-					let elm_drag = document.getElementById(id);
-					elm_drag.classList.remove("unsorted-item");
-					this.parentNode.insertBefore(elm_drag, this);
-					this.classList.remove("drop-target-border");
-					refreshRate();
-				};
-			});
+				document.querySelectorAll('.drag-list li').forEach (elm => {
+					// 選択中アイテムに色を付ける
+					elm.onclick = function (event) {
+						event.stopPropagation();
+						event.currentTarget.classList.toggle("selected-item");
+						releaseSelect(event.currentTarget);
+					};
+					// ドラッグ＆ドロップ動作
+					elm.ondragstart = function (event) {
+						event.dataTransfer.setData('text/plain', event.currentTarget.id);
+						event.currentTarget.classList.add("selected-item");
+						releaseSelect(event.currentTarget);
+					};
+					elm.ondragover = function (event) {
+						event.preventDefault();
+						this.classList.add("drop-target-border");
+					};
+					elm.ondragleave = function () {
+						this.classList.remove("drop-target-border");
+					};
+					elm.ondrop = function (event) {
+						event.preventDefault();
+						let id = event.dataTransfer.getData('text/plain');
+						let elm_drag = document.getElementById(id);
+						elm_drag.classList.remove("unsorted-item");
+						this.parentNode.insertBefore(elm_drag, this);
+						this.classList.remove("drop-target-border");
+						refreshRate();
+					};
+				});
 
+			}
+			reader.readAsDataURL(file)
 		}
-		reader.readAsDataURL(file)
-	}
-}
-function onBodyClick() {
-	releaseSelect(null);
-}
+	});
+
+	// アップロードにドロップでページ移動しないようにする
+	divUploadArea.addEventListener("dragover", (e) => {
+		e.preventDefault()
+	});
+
+	// カード画像以外クリックで選択解除
+	document.body.addEventListener("click", (e) => {
+		releaseSelect(null);
+	});
+
+	// 未ソート色を全クリアボタン
+	btnClearUunsorted.addEventListener("click", (e) => {
+		[...document.querySelectorAll('.drag-list li')].forEach(elm => {
+			elm.classList.remove("unsorted-item");
+		});
+	});
+
+	// 画像を全て削除ボタン
+	btnRemoveAllItem.addEventListener("click", (e) => {
+		[...document.querySelectorAll('.drag-list li')].forEach(elm => {
+			elm.remove();
+		});
+	});
+
+	// 現在の並び順を出力ボタン
+	btnMakeRenameCommand.addEventListener("click", (e) => {
+		const getFileExt = f => f.split('.').pop();
+
+		let command = "";
+
+		const list = [...document.querySelectorAll('.drag-list li')];
+		command += list.map(elm => `ren "${elm.dataset.originalFile}" "${"TMP_" + String(list.indexOf(elm)).padStart(4, "0") + "." + getFileExt(elm.dataset.originalFile)}"`).join("\n");
+
+		command += "\n";
+		command += "ren TMP_*.* IMG_*.*\n";
+
+		document.querySelector("#txtOutputCommand").value = command;
+		document.querySelector('#favDialog').showModal();
+	});
+
+});
+
+// 割合表示の更新
 function refreshRate() {
 	var list = [...document.querySelectorAll('.drag-list li span')];
 	list.forEach(elm => elm.innerText = String(Math.round((list.indexOf(elm) / list.length) * 100)).padStart(2, "0") + "%");
 }
+
+// 選択解除
 function releaseSelect(withoutElement) {
 	[...document.querySelectorAll('.drag-list li')].filter(elm => elm != withoutElement).forEach(elm => {
 		elm.classList.remove("selected-item");
 	});
 }
 
-
-// 未ソート色を全クリア
-function clearUunsorted() {
-	[...document.querySelectorAll('.drag-list li')].forEach(elm => {
-		elm.classList.remove("unsorted-item");
-	});
-}
-
-// 画像を全て削除
-function removeAllItem() {
-	[...document.querySelectorAll('.drag-list li')].forEach(elm => {
-		elm.remove();
-	});
-}
-
-// 現在の並び順を出力
-function makeRenameCommand() {
-	const getFileExt = f => f.split('.').pop();
-
-	let command = "";
-
-	const list = [...document.querySelectorAll('.drag-list li')];
-	command += list.map(elm => `ren "${elm.dataset.originalFile}" "${"TMP_" + String(list.indexOf(elm)).padStart(4, "0") + "." + getFileExt(elm.dataset.originalFile)}"`).join("\n");
-
-	command += "\n";
-	command += "ren TMP_*.* IMG_*.*\n";
-
-	document.querySelector("#txtOutputCommand").value = command;
-	document.querySelector('#favDialog').showModal();
-}
 </script>
 <style>
 .drag-list {
@@ -132,22 +146,22 @@ function makeRenameCommand() {
 }
 </style>
 </head>
-<body onclick="onBodyClick();">
+<body>
 
 <nav class="navbar navbar-dark bg-dark mb-3">
 		<a class="navbar-brand ms-3" href="#">マリガン基準ヘルパー</a>
 </nav>
 
 <div class="container mb-3">
-	<button type="button" class="btn btn-primary" onclick="clearUunsorted()">未ソート色を全クリア</button>
-	<button type="button" class="btn btn-primary" onclick="removeAllItem()">画像を全て削除</button>
-	<button type="button" class="btn btn-primary" onclick="makeRenameCommand()">現在の並び順を出力</button>
+	<button id="btnClearUunsorted"    type="button" class="btn btn-primary">未ソート色を全クリア</button>
+	<button id="btnRemoveAllItem"     type="button" class="btn btn-primary">画像を全て削除</button>
+	<button id="btnMakeRenameCommand" type="button" class="btn btn-primary">現在の並び順を出力</button>
 </div>
 <ul id="uploadImageArea" class="drag-list"></ul>
 <div class="container">
-	<div ondrop="fileDrop(event)" ondragover="fileDragOver(event)" class="mb-3 d-flex justify-content-center border rounded">
+	<div id="divUploadArea" class="mb-3 d-flex justify-content-center border rounded">
 		<div class="p-5">
-			ここにドラッグ＆ドロップ
+			ここに手札画像をドラッグ＆ドロップ
 		</div>
 	</div>
 </div>
@@ -168,6 +182,11 @@ function makeRenameCommand() {
 *		クリックでトグル。ONならそれ以外をOFF。
 *		ドラッグ開始で開始要素をON、それ以外をOFF。
 *スクリプト出力
+スクリプトを整理
+	イベントハンドラはaddEventListener方式にする
+	idとクラス整理
+デザインを整理
+	このメモも消す。
 
 ■デザイン
 ・ソート
