@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <title>drag on drop</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+    <script>
+      var id = 0;
+      function fileDragOver(e) {
+        e.preventDefault()
+      }
+      function fileDrop(e) {
+        e.preventDefault()
+        const files = e.dataTransfer.files
+        for (var i = 0; i < files.length; i++) {
+          const file = files[i]
+
+          const reader = new FileReader()
+          reader.onload = (event) => {
+            const base64Text = event.currentTarget.result
+
+            id++;
+            document.querySelector('#uploadImageArea').innerHTML += `<li id="item${id}" draggable="true" style="background-color:cyan"><span>0%</span><img src="${base64Text}" width="500px" /></li>`
+            refreshRate();
+
+            // 順序入れ替え
+            document.querySelectorAll('.drag-list li').forEach (elm => {
+                elm.ondragstart = function (event) {
+                    event.dataTransfer.setData('text/plain', event.currentTarget.id);
+                };
+                elm.ondragover = function (event) {
+                    event.preventDefault();
+                    this.style.borderTop = '2px solid blue';
+                };
+                elm.ondragleave = function () {
+                    this.style.borderTop = '';
+                };
+                elm.ondrop = function (event) {
+                    event.preventDefault();
+                    let id = event.dataTransfer.getData('text/plain');
+                    let elm_drag = document.getElementById(id);
+                    elm_drag.style.backgroundColor = "";
+                    this.parentNode.insertBefore(elm_drag, this);
+                    this.style.borderTop = '';
+                    refreshRate();
+                };
+            });
+
+          }
+          reader.readAsDataURL(file)
+        }
+      }
+      function refreshRate() {
+        var list = [...document.querySelectorAll('.drag-list li span')];
+        list.forEach(elm => elm.innerText = String(Math.round((list.indexOf(elm) / list.length) * 100)).padStart(2, 0) + "%");
+      }
+    </script>
+    <style>
+    .flex-box {
+		border: solid;
+        display         : flex;
+        flex-wrap       : wrap;
+        flex-direction  : row; /* column; */
+        /* height          : 200vh; */
+    }
+    .flex-box li {
+        list-style-type : none;
+        margin-right    : 20px;
+        margin-bottom   : 5px;
+    }
+    </style>
+  </head>
+  <body>
+    <nav class="navbar navbar-dark bg-dark mb-3">
+      <a class="navbar-brand ms-3" href="#">マリガン基準ヘルパー</a>
+    </nav>
+    <ul id="uploadImageArea" class="drag-list flex-box"></ul>
+    <div class="container">
+      <div ondrop="fileDrop(event)" ondragover="fileDragOver(event)" class="mb-3 d-flex justify-content-center border rounded">
+        <div class="p-5">
+          ここにドラッグ＆ドロップ
+        </div>
+      </div>
+    </div>
+
+■todo
+N字で出せるようにする
+挿入位置の色を目立つように
+同じ画像は読み込まない
+スクリプト出力
+
+■デザイン
+・ソート
+これは何？
+使い方。ソート説明も書く
+
+[未ソート色を全クリア]　[画像を全て削除]　[現在の並び順を出力]　※現在の並び順になるよう、ファイル名変更をするためのバッチコマンドを出力する。
+
+N字
+
+ここにドラッグ＆ドロップ
+
+・名称変更スクリプトを書き出す。
+	ファイル名をデータとしてもっとく
+	書き出しボタンで、
+	ファイル名→temp_連番→temp外し
+	のバッチを書き出す
+
+・オプション
+
+・マリガンによる確率
+どういう基準でマリガンすれば、手札の期待値を高くできるかの算出シミュレータ。
+0回マリガン後の手札点数MAX：100　1回マリガン後の手札点数MAX：[80]　2回マリガン後の手札点数MAX：[60]　[計算]
+							2回目キープ基準点
+１回目キープ基準点
+
+・先行後攻シミュレーター
+対戦で後攻を連続して引いてしまうことは不自然ではないことを納得するためのツール。
+対戦回数：[20]
+先(青)　後(赤)
+
+
+【参考URL】
+https://codelikes.com/javascript-ondrop-ondragover/<br>
+https://blog.ver001.com/javascript-dragdrop-sort/<br>
+【以下はキープ】
+クリーチャー2
+クマノ、クリーチャー
+クマノ、スクイーは除去があるならok
+
+
+  </body>
+</html>
