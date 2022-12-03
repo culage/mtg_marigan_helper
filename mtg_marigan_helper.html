@@ -23,28 +23,38 @@ function fileDrop(e) {
 			if ( isExistsImage ) { return; }
 
 			id++;
-			document.querySelector('#uploadImageArea').innerHTML += `<li id="item${id}" draggable="true" style="background-color:cyan"><span>0%</span><img src="${base64Text}" /></li>`
-			refreshRate();
+			document.querySelector('#uploadImageArea').innerHTML += `<li id="item${id}" draggable="true" class="unsorted-item"><span>0%</span><img src="${base64Text}" /></li>`
 
 			// 順序入れ替え
+			refreshRate();
+
 			document.querySelectorAll('.drag-list li').forEach (elm => {
+				// 選択中アイテムに色を付ける
+				elm.onclick = function (event) {
+					event.stopPropagation();
+					event.currentTarget.classList.toggle("selected-item");
+					releaseSelect(event.currentTarget);
+				};
+				// ドラッグ＆ドロップ動作
 				elm.ondragstart = function (event) {
 					event.dataTransfer.setData('text/plain', event.currentTarget.id);
+					event.currentTarget.classList.add("selected-item");
+					releaseSelect(event.currentTarget);
 				};
 				elm.ondragover = function (event) {
 					event.preventDefault();
-					this.style.borderTop = '10px solid red';
+					this.classList.add("drop-target-border");
 				};
 				elm.ondragleave = function () {
-					this.style.borderTop = '';
+					this.classList.remove("drop-target-border");
 				};
 				elm.ondrop = function (event) {
 					event.preventDefault();
 					let id = event.dataTransfer.getData('text/plain');
 					let elm_drag = document.getElementById(id);
-					elm_drag.style.backgroundColor = "";
+					elm_drag.classList.remove("unsorted-item");
 					this.parentNode.insertBefore(elm_drag, this);
-					this.style.borderTop = '';
+					this.classList.remove("drop-target-border");
 					refreshRate();
 				};
 			});
@@ -53,9 +63,17 @@ function fileDrop(e) {
 		reader.readAsDataURL(file)
 	}
 }
+function onBodyClick() {
+	releaseSelect(null);
+}
 function refreshRate() {
 	var list = [...document.querySelectorAll('.drag-list li span')];
 	list.forEach(elm => elm.innerText = String(Math.round((list.indexOf(elm) / list.length) * 100)).padStart(2, 0) + "%");
+}
+function releaseSelect(withoutElement) {
+	[...document.querySelectorAll('.drag-list li')].filter(elm => elm != withoutElement).forEach(elm => {
+		elm.classList.remove("selected-item");
+	});
 }
 </script>
 <style>
@@ -66,15 +84,24 @@ function refreshRate() {
 	margin-right		: 20px;
 }
 .drag-list li {
-	list-style-type : none;
-	margin-bottom 	: 5px;
+	list-style-type 	: none;
+	margin-bottom 		: 5px;
 }
 .drag-list li img {
-	width 					: calc(100% - 3em);
+	width 				: calc(100% - 3em);
+}
+.unsorted-item {
+	background-color	: cyan;
+}
+.selected-item {
+	outline				: 5px solid orange;
+}
+.drop-target-border {
+	border-top			: 10px solid red;
 }
 </style>
 </head>
-<body>
+<body onclick="onBodyClick();">
 
 <nav class="navbar navbar-dark bg-dark mb-3">
 		<a class="navbar-brand ms-3" href="#">マリガン基準ヘルパー</a>
@@ -83,7 +110,7 @@ function refreshRate() {
 <ul id="uploadImageArea" class="drag-list"></ul>
 <div class="container">
 	<div ondrop="fileDrop(event)" ondragover="fileDragOver(event)" class="mb-3 d-flex justify-content-center border rounded">
-		<div class="p-4">
+		<div class="p-5">
 			ここにドラッグ＆ドロップ
 		</div>
 	</div>
@@ -93,9 +120,9 @@ function refreshRate() {
 *N字で出せるようにする
 *挿入位置の色を目立つように
 *同じ画像は読み込まない
-選択中色をつける
-		クリックでトグル。ONならそれ以外をOFF。
-		ドラッグ開始で開始要素をON、それ以外をOFF。
+*選択中アイテムに色をつける
+*		クリックでトグル。ONならそれ以外をOFF。
+*		ドラッグ開始で開始要素をON、それ以外をOFF。
 スクリプト出力
 
 ■デザイン
