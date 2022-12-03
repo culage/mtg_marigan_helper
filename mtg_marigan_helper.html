@@ -11,10 +11,8 @@ document.addEventListener("DOMContentLoaded", () => {
 	let sizeBase = 500;
 	
 	// 画像ドロップ処理
-	divDropImageArea.addEventListener("drop", (event) => {
+	divDropImageArea.addEventListener("drop", async (event) => {
 		event.preventDefault();
-		
-		const fileloadPromiseList = [];
 		
 		// 要素追加
 		const files = event.dataTransfer.files;
@@ -35,45 +33,42 @@ document.addEventListener("DOMContentLoaded", () => {
 				reader.readAsDataURL(file)
 			});
 			
-			fileloadPromiseList.push(p);
+			await p;
 		}
 		
-		// 全ての追加後
-		Promise.all(fileloadPromiseList).then(() => {
-			// 順序表示
-			refreshRate();
+		// 順序表示
+		refreshRate();
 
-			// 各アイテム動作
-			document.querySelectorAll('#drag-list li').forEach (elm => {
-				// 選択中アイテムに色を付ける
-				elm.onclick = function (event) {
-					event.stopPropagation();
-					event.currentTarget.classList.toggle("selected-item");
-					releaseSelect(event.currentTarget);
-				};
-				// ドラッグ＆ドロップ動作
-				elm.ondragstart = function (event) {
-					event.dataTransfer.setData('text/plain', event.currentTarget.id);
-					event.currentTarget.classList.add("selected-item");
-					releaseSelect(event.currentTarget);
-				};
-				elm.ondragover = function (event) {
-					event.preventDefault();
-					this.classList.add("drop-target-border");
-				};
-				elm.ondragleave = function () {
-					this.classList.remove("drop-target-border");
-				};
-				elm.ondrop = function (event) {
-					event.preventDefault();
-					let id = event.dataTransfer.getData('text/plain');
-					let elm_drag = document.getElementById(id);
-					elm_drag.classList.remove("unsorted-item");
-					this.parentNode.insertBefore(elm_drag, this);
-					this.classList.remove("drop-target-border");
-					refreshRate();
-				};
-			});
+		// 各アイテム動作
+		document.querySelectorAll('#drag-list li').forEach (elm => {
+			// 選択中アイテムに色を付ける
+			elm.onclick = function (event) {
+				event.stopPropagation();
+				event.currentTarget.classList.toggle("selected-item");
+				releaseSelect(event.currentTarget);
+			};
+			// ドラッグ＆ドロップ動作
+			elm.ondragstart = function (event) {
+				event.dataTransfer.setData('text/plain', event.currentTarget.id);
+				event.currentTarget.classList.add("selected-item");
+				releaseSelect(event.currentTarget);
+			};
+			elm.ondragover = function (event) {
+				event.preventDefault();
+				this.classList.add("drop-target-border");
+			};
+			elm.ondragleave = function () {
+				this.classList.remove("drop-target-border");
+			};
+			elm.ondrop = function (event) {
+				event.preventDefault();
+				let id = event.dataTransfer.getData('text/plain');
+				let elm_drag = document.getElementById(id);
+				elm_drag.classList.remove("unsorted-item");
+				this.parentNode.insertBefore(elm_drag, this);
+				this.classList.remove("drop-target-border");
+				refreshRate();
+			};
 		});
 
 	});
